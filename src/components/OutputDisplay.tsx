@@ -4,9 +4,10 @@ import { Copy, CheckCircle2, Code2, Quote } from 'lucide-react';
 interface OutputDisplayProps {
   output: string;
   error: string | null;
+  variableColors: Record<string, string>;
 }
 
-const OutputDisplay: React.FC<OutputDisplayProps> = ({ output, error }) => {
+const OutputDisplay: React.FC<OutputDisplayProps> = ({ output, error, variableColors }) => {
   const [copied, setCopied] = useState(false);
   const [showRaw, setShowRaw] = useState(false);
   const [quoteStyle, setQuoteStyle] = useState<'single' | 'double'>('double');
@@ -18,7 +19,17 @@ const OutputDisplay: React.FC<OutputDisplayProps> = ({ output, error }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const formattedOutput = showRaw ? output.trim() : `${quoteStyle === 'single' ? "'''" : '"""'}${output}${quoteStyle === 'single' ? "'''" : '"""'}`;
+  const colorizeOutput = (text: string) => {
+    let result = text;
+    Object.entries(variableColors).forEach(([varName, color]) => {
+      const regex = new RegExp(`{${varName}}`, 'g');
+      result = result.replace(regex, `<span style="color: ${color}">{${varName}}</span>`);
+    });
+    return result;
+  };
+
+  const formattedOutput = showRaw ? output : `${quoteStyle === 'single' ? "'''" : '"""'}${output}${quoteStyle === 'single' ? "'''" : '"""'}`;
+  const colorizedOutput = showRaw ? output : colorizeOutput(formattedOutput);
 
   return (
     <div className="w-1/2 flex flex-col overflow-hidden">
@@ -72,20 +83,21 @@ const OutputDisplay: React.FC<OutputDisplayProps> = ({ output, error }) => {
 
       <div className="flex-1 relative">
         <div className="absolute inset-0 overflow-auto">
-          <div className="p-4 font-mono text-sm bg-white dark:bg-gray-800 whitespace-pre-wrap min-h-full">
-            {error ? (
-              <div className="text-red-500 dark:text-red-400">
-                <span className="font-bold">Error: </span>
-                {error}
-              </div>
-            ) : output ? (
-              formattedOutput
-            ) : (
-              <span className="text-gray-400 dark:text-gray-500 italic">
-                Output will appear here
-              </span>
-            )}
-          </div>
+          <div 
+            className="p-4 font-mono text-sm bg-white dark:bg-gray-800 whitespace-pre-wrap min-h-full"
+            dangerouslySetInnerHTML={{
+              __html: error ? (
+                `<div class="text-red-500 dark:text-red-400">
+                  <span class="font-bold">Error: </span>
+                  ${error}
+                </div>`
+              ) : output ? (
+                colorizedOutput
+              ) : (
+                '<span class="text-gray-400 dark:text-gray-500 italic">Output will appear here</span>'
+              )
+            }}
+          />
         </div>
       </div>
     </div>

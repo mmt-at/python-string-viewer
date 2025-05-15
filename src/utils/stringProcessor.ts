@@ -22,7 +22,7 @@ export function parseString(input: string, language: string): string {
         (cleanInput.startsWith("'") && cleanInput.endsWith("'"))) {
       cleanInput = cleanInput.slice(1, -1);
     }
-    
+
     // Handle f-string prefix
     if (cleanInput.startsWith('f')) {
       cleanInput = cleanInput.slice(1);
@@ -79,11 +79,12 @@ export function extractVariables(fstring: string): string[] {
 }
 
 /**
- * Process an f-string with variable values
+ * Process an f-string with variable values and colors
  */
 export function processStringWithVariables(
   fstring: string, 
-  variables: Record<string, string>
+  variables: Record<string, string>,
+  variableColors: Record<string, string> = {}
 ): string {
   try {
     // Handle different quote styles for f-strings
@@ -103,19 +104,22 @@ export function processStringWithVariables(
     // Replace variables in the string
     const result = content.replace(
       /\{([a-zA-Z0-9_]+)(?:\.[a-zA-Z0-9_]+)*(?:\[[^\]]*\])*(?::(?:[^{}]|\{[^{}]*\})*)?}/g,
-      (match, varName) => {
+      (_match, varName) => {
         // Extract just the variable name without any formatting
         const bareVarName = varName.split(/[:.[\s]/)[0];
         
         if (bareVarName in variables) {
           let processedValue = variables[bareVarName].trim();
-          // 去掉头尾空格，去掉头尾的''或者""
           if ((processedValue.startsWith('"""') && processedValue.endsWith('"""')) || 
               (processedValue.startsWith("'''") && processedValue.endsWith("'''"))) {
             processedValue = processedValue.slice(3, -3);
           } else if ((processedValue.startsWith('"') && processedValue.endsWith('"')) || 
                      (processedValue.startsWith("'") && processedValue.endsWith("'"))) {
             processedValue = processedValue.slice(1, -1);
+          }
+          const color = variableColors[bareVarName];
+          if (color) {
+            return `<span style="color: ${color}">${processedValue}</span>`;
           }
           return processedValue;
         }

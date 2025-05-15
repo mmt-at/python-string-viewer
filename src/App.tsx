@@ -11,6 +11,7 @@ function App() {
   const [selectedLanguage, setSelectedLanguage] = useState('python');
   const [isFString, setIsFString] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [variableColors, setVariableColors] = useState<Record<string, string>>({});
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -25,7 +26,7 @@ function App() {
   useEffect(() => {
     try {
       if (isFString) {
-        setOutput(processStringWithVariables(inputString, variables));
+        setOutput(processStringWithVariables(inputString, variables, variableColors));
       } else {
         setOutput(parseString(inputString, selectedLanguage));
       }
@@ -33,7 +34,7 @@ function App() {
     } catch (err) {
       setError((err as Error).message);
     }
-  }, [inputString, variables, selectedLanguage, isFString]);
+  }, [inputString, variables, selectedLanguage, isFString, variableColors]);
 
   useEffect(() => {
     const fStringPattern = /f(['"]).*\{.*\}.*\1/s;
@@ -56,8 +57,26 @@ function App() {
       });
       
       setVariables(newVars);
+      
+      // Clean up colors for removed variables
+      setVariableColors(prev => {
+        const newColors = { ...prev };
+        Object.keys(prev).forEach(key => {
+          if (!extractedVars.includes(key)) {
+            delete newColors[key];
+          }
+        });
+        return newColors;
+      });
     }
   }, [inputString]);
+
+  const handleColorChange = (name: string, color: string) => {
+    setVariableColors(prev => ({
+      ...prev,
+      [name]: color
+    }));
+  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
@@ -76,11 +95,14 @@ function App() {
           setVariables={setVariables}
           isFString={isFString}
           selectedLanguage={selectedLanguage}
+          variableColors={variableColors}
+          onColorChange={handleColorChange}
         />
         
         <OutputDisplay 
           output={output} 
           error={error}
+          variableColors={variableColors}
         />
       </div>
     </div>

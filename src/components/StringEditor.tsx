@@ -8,6 +8,8 @@ interface StringEditorProps {
   setVariables: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   isFString: boolean;
   selectedLanguage: string;
+  variableColors: Record<string, string>;
+  onColorChange: (name: string, color: string) => void;
 }
 
 const StringEditor: React.FC<StringEditorProps> = ({
@@ -16,7 +18,9 @@ const StringEditor: React.FC<StringEditorProps> = ({
   variables,
   setVariables,
   isFString,
-  selectedLanguage
+  selectedLanguage,
+  variableColors,
+  onColorChange
 }) => {
   const [splitPosition, setSplitPosition] = useState(70);
   const splitPaneRef = useRef<HTMLDivElement>(null);
@@ -97,7 +101,9 @@ const StringEditor: React.FC<StringEditorProps> = ({
                 <div className="absolute inset-0 overflow-auto">
                   <VariableInputs 
                     variables={variables} 
-                    setVariables={setVariables} 
+                    setVariables={setVariables}
+                    variableColors={variableColors}
+                    onColorChange={onColorChange}
                   />
                 </div>
               </div>
