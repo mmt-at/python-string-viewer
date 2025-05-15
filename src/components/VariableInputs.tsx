@@ -7,17 +7,6 @@ interface VariableInputsProps {
 
 const VariableInputs: React.FC<VariableInputsProps> = ({ variables, setVariables }) => {
   const handleVariableChange = (name: string, value: string) => {
-    // // 去掉头尾空格，去掉头尾的''或者""
-    // let processedValue = value.trim();
-    
-    // // 如果值被单引号或双引号包围，则去掉它们
-    // if ((processedValue.startsWith('"') && processedValue.endsWith('"')) || 
-    //     (processedValue.startsWith("'") && processedValue.endsWith("'"))) {
-    //   processedValue = processedValue.slice(1, -1);
-    // }
-    
-    // 使用处理后的值
-    // value = processedValue;
     setVariables(prev => ({
       ...prev,
       [name]: value

@@ -9,17 +9,23 @@ export function parseString(input: string, language: string): string {
   if (!input) return '';
   
   try {
-    // Remove quotes if present
-    let cleanInput = input;
-    if ((input.startsWith('"') && input.endsWith('"')) || 
-        (input.startsWith("'") && input.endsWith("'"))) {
-      cleanInput = input.slice(1, -1);
-    }
+    // Trim whitespace from input
+    let cleanInput = input.trim();
     
     // Handle triple quoted strings
-    if ((input.startsWith('"""') && input.endsWith('"""')) || 
-        (input.startsWith("'''") && input.endsWith("'''"))) {
-      cleanInput = input.slice(3, -3);
+    if ((cleanInput.startsWith('"""') && cleanInput.endsWith('"""')) || 
+        (cleanInput.startsWith("'''") && cleanInput.endsWith("'''"))) {
+      cleanInput = cleanInput.slice(3, -3);
+    }
+    // Remove quotes if present
+    else if ((cleanInput.startsWith('"') && cleanInput.endsWith('"')) || 
+        (cleanInput.startsWith("'") && cleanInput.endsWith("'"))) {
+      cleanInput = cleanInput.slice(1, -1);
+    }
+    
+    // Handle f-string prefix
+    if (cleanInput.startsWith('f')) {
+      cleanInput = cleanInput.slice(1);
     }
     
     // For Python and JavaScript, we can use JSON.parse with some adjustments
